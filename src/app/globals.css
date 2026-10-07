@@ -1,26 +1,42 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f5f5;
+  --foreground: #1d1c1c;
+
+  --color-status-green: #3cd856;
+  --color-accent-green: #29bf12;
+  --color-status-yellow: #e3b820;
+  --color-status-red: #f92c2c;
+  --color-purple: #8840e5;
+  --color-whatsapp-green: #25d366;
+
+  --color-card-green: #dcfce7;
+  --color-card-yellow: #fff4de;
+  --color-card-purple: #f3e8ff;
+  --color-card-red: #ffdadf;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-status-green: var(--color-status-green);
+  --color-accent-green: var(--color-accent-green);
+  --color-status-yellow: var(--color-status-yellow);
+  --color-status-red: var(--color-status-red);
+  --color-purple: var(--color-purple);
+  --color-whatsapp-green: var(--color-whatsapp-green);
+
+  --color-card-green: var(--color-card-green);
+  --color-card-yellow: var(--color-card-yellow);
+  --color-card-purple: var(--color-card-purple);
+  --color-card-red: var(--color-card-red);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
 }
