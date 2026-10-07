@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { SubscribeRequiredDialog } from "@/components/SubscribeRequiredDialog";
-import { whatsappChatUrl } from "@/lib/whatsapp";
+import { ContactSupportDialog } from "@/components/ContactSupportDialog";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", gated: false },
@@ -23,6 +23,7 @@ export default function DashboardLayout({
   const { isAuthenticated, isLoadingProfile, isSubscribed, profileHasError } =
     useAuth();
   const [showSubscribeDialog, setShowSubscribeDialog] = useState(false);
+  const [showContactDialog, setShowContactDialog] = useState(false);
 
   useEffect(() => {
     if (!isLoadingProfile && !isAuthenticated) {
@@ -76,19 +77,22 @@ export default function DashboardLayout({
         {children}
       </main>
 
-      <a
-        href={whatsappChatUrl()}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        onClick={() => setShowContactDialog(true)}
         className="fixed bottom-6 right-6 z-30 flex items-center gap-2 rounded-full bg-whatsapp-green px-5 py-3 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-105"
       >
         Chat with Us
-      </a>
+      </button>
 
       <SubscribeRequiredDialog
         open={showSubscribeDialog}
         profileHasError={profileHasError}
         onClose={() => setShowSubscribeDialog(false)}
+      />
+
+      <ContactSupportDialog
+        open={showContactDialog}
+        onClose={() => setShowContactDialog(false)}
       />
     </div>
   );

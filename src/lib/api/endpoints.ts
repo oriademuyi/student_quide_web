@@ -1,5 +1,6 @@
 export const ApiEndpoints = {
   login: "auth/login",
+  refreshToken: "auth/refreshtoken",
   register: "auth/register",
   verify: "auth/verify",
   resendOtp: "auth/resend-otp",

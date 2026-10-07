@@ -4,15 +4,17 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import useSWR, { useSWRConfig } from "swr";
-import { ApiError } from "@/lib/api/client";
+import { ApiError, SESSION_EXPIRED_EVENT } from "@/lib/api/client";
 import { login as loginRequest } from "@/lib/api/auth";
 import { getCurrentUser } from "@/lib/api/profile";
-import { clearToken, getToken, setToken } from "@/lib/auth/token";
+import { clearAllTokens, getToken, setRefreshToken, setToken } from "@/lib/auth/token";
 import { isSubscriptionActive } from "@/types/subscription";
 import type { ProfileUser } from "@/types/profile";
 
@@ -40,6 +42,8 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 const PROFILE_KEY = "profile";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
+
   // Lazy initializer (not an effect) so reading localStorage happens once,
   // during the first client render, without tripping the "no setState in
   // effects" rule.
@@ -63,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const res = await loginRequest(identifier, password);
         setToken(res.data.accessToken);
+        setRefreshToken(res.data.refreshToken);
         setHasToken(true);
         // The hook's own `mutate` is still bound to the pre-login key
         // (null) in this closure, since `setHasToken` hasn't re-rendered
@@ -81,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(() => {
-    clearToken();
+    clearAllTokens();
     setHasToken(false);
     globalMutate(PROFILE_KEY, null, false);
   }, [globalMutate]);
@@ -89,6 +94,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshProfile = useCallback(async () => {
     await mutate();
   }, [mutate]);
+
+  // The API client fires this when a refresh-token attempt fails (the
+  // refresh token itself is gone/expired) — subscribing here, rather than
+  // having the client navigate directly, keeps client.ts framework-agnostic
+  // and lets us use the Next.js router instead of a full page reload.
+  useEffect(() => {
+    function onSessionExpired() {
+      setHasToken(false);
+      globalMutate(PROFILE_KEY, null, false);
+      router.push("/login");
+    }
+
+    window.addEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
+    return () => {
+      window.removeEventListener(SESSION_EXPIRED_EVENT, onSessionExpired);
+    };
+  }, [globalMutate, router]);
 
   const isSubscribed = profile ? isSubscriptionActive(profile.subscription) : false;
   const isAdmin = !!profile && profile.role !== "student";

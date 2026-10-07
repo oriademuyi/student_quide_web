@@ -1,4 +1,4 @@
-export const SUPPORT_WHATSAPP_NUMBER = "2348141050603";
+export const SUPPORT_WHATSAPP_NUMBER = "2347075987793";
 
 export function whatsappChatUrl(
   message = "Hello, I need help with the Student Guide app."
