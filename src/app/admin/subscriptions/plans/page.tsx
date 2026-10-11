@@ -52,7 +52,7 @@ export default function AdminPlansPage() {
           {plans.map((plan) => (
             <Link
               key={plan.id}
-              href={`/admin/subscriptions/plans/${plan.id}`}
+              href={`/admin/subscriptions/plans/edit?id=${encodeURIComponent(plan.id)}`}
               className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
             >
               <div>

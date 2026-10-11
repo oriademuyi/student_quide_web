@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useParams } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
@@ -25,8 +25,8 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleString("en-GB");
 }
 
-export default function AiInteractionDetailPage() {
-  const params = useParams<{ id: string }>();
+function AiInteractionDetailPageContent() {
+  const id = useSearchParams().get("id") ?? "";
   const toast = useToast();
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -35,7 +35,7 @@ export default function AiInteractionDetailPage() {
     error,
     isLoading,
     mutate: reload,
-  } = useSWR(["interaction", params.id], async ([, id]) => (await getInteraction(id)).data);
+  } = useSWR(id ? ["interaction", id] : null, async ([, id]) => (await getInteraction(id)).data);
 
   const errorMessage = error
     ? error instanceof ApiError
@@ -46,7 +46,7 @@ export default function AiInteractionDetailPage() {
   async function onViewFile() {
     setIsDownloading(true);
     try {
-      const res = await getInteractionDownloadUrl(params.id);
+      const res = await getInteractionDownloadUrl(id);
       window.open(res.data.url, "_blank", "noopener,noreferrer");
     } catch (e) {
       const message =
@@ -159,5 +159,13 @@ export default function AiInteractionDetailPage() {
         </Button>
       )}
     </div>
+  );
+}
+
+export default function AiInteractionDetailPage() {
+  return (
+    <Suspense fallback={null}>
+      <AiInteractionDetailPageContent />
+    </Suspense>
   );
 }
