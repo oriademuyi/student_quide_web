@@ -9,7 +9,7 @@ import { ApiEndpoints } from "./endpoints";
 
 const BASE_URL = (
   process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "https://noun-api-n2om.onrender.com/api/v1"
+  "https://api.studentpadi.com/api/v1"
 ).replace(/\/$/, "");
 
 export class ApiError extends Error {
