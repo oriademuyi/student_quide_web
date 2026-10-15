@@ -5,6 +5,8 @@ import useSWR from "swr";
 import { downloadMaterial, getMaterials } from "@/lib/api/materials";
 import { useToast } from "@/components/ui/Toast";
 import { ApiError } from "@/lib/api/client";
+import { Button } from "@/components/ui/Button";
+import { ContactSupportDialog } from "@/components/ContactSupportDialog";
 import type { MaterialItem, MaterialType } from "@/types/material";
 
 export function StudentMaterialsBrowser({
@@ -26,6 +28,7 @@ export function StudentMaterialsBrowser({
   const [courseCode, setCourseCode] = useState("");
   const [searched, setSearched] = useState(false);
   const [openingId, setOpeningId] = useState<string | null>(null);
+  const [showContact, setShowContact] = useState(false);
 
   const { data, error, isLoading } = useSWR(
     "materials",
@@ -152,6 +155,40 @@ export function StudentMaterialsBrowser({
           })}
         </div>
       )}
+
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 p-5 text-center sm:flex-row sm:justify-between sm:text-left">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-whatsapp-green/10 text-lg">
+            💬
+          </span>
+          <div>
+            <p className="text-sm font-semibold text-neutral-800">
+              Can&apos;t find your {emptyLabel}?
+            </p>
+            <p className="text-xs text-neutral-500">
+              Message us and we&apos;ll help you get it sorted.
+            </p>
+          </div>
+        </div>
+        <Button
+          variant="outline"
+          className="w-full shrink-0 sm:w-auto"
+          onClick={() => setShowContact(true)}
+        >
+          Message Us
+        </Button>
+      </div>
+
+      <ContactSupportDialog
+        open={showContact}
+        onClose={() => setShowContact(false)}
+        initialCategory="Course Materials"
+        initialIssue={
+          searched && courseCode.trim()
+            ? `I couldn't find the ${emptyLabel} for ${courseCode.trim()}. Please can you upload it?`
+            : `I couldn't find the ${emptyLabel} I'm looking for. Please can you help?`
+        }
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { Select, Textarea } from "@/components/ui/Input";
@@ -11,6 +11,7 @@ const CATEGORIES = [
   "Payment / Subscription",
   "Technical Issue",
   "Account / Login",
+  "Course Materials",
   "ExamAI",
   "Other",
 ];
@@ -18,13 +19,24 @@ const CATEGORIES = [
 export function ContactSupportDialog({
   open,
   onClose,
+  initialCategory,
+  initialIssue,
 }: {
   open: boolean;
   onClose: () => void;
+  initialCategory?: string;
+  initialIssue?: string;
 }) {
   const { profile } = useAuth();
-  const [category, setCategory] = useState(CATEGORIES[0]);
-  const [issue, setIssue] = useState("");
+  const [category, setCategory] = useState(initialCategory ?? CATEGORIES[0]);
+  const [issue, setIssue] = useState(initialIssue ?? "");
+
+  useEffect(() => {
+    if (open) {
+      setCategory(initialCategory ?? CATEGORIES[0]);
+      setIssue(initialIssue ?? "");
+    }
+  }, [open, initialCategory, initialIssue]);
 
   function handleSend() {
     if (!issue.trim()) return;
