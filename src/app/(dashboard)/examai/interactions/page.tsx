@@ -87,7 +87,7 @@ export default function AiInteractionsPage() {
           {items.map((item) => (
             <Link
               key={item.id}
-              href={`/examai/interactions/${item.id}`}
+              href={`/examai/interactions/view?id=${encodeURIComponent(item.id)}`}
               className="flex items-start gap-3 rounded-2xl bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-status-green/10 text-lg">

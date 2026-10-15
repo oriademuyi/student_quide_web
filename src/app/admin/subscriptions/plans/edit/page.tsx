@@ -1,27 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import useSWR, { useSWRConfig } from "swr";
 import { PlanForm, type PlanFormValues } from "@/components/admin/PlanForm";
 import { useToast } from "@/components/ui/Toast";
 import { getPlans, updatePlan } from "@/lib/api/subscription";
 import { ApiError } from "@/lib/api/client";
 
-export default function EditPlanPage() {
-  const params = useParams<{ id: string }>();
+function EditPlanPageContent() {
+  const id = useSearchParams().get("id") ?? "";
   const router = useRouter();
   const toast = useToast();
   const { mutate } = useSWRConfig();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: plans, isLoading } = useSWR("plans", async () => (await getPlans()).data);
-  const plan = plans?.find((p) => p.id === params.id);
+  const plan = plans?.find((p) => p.id === id);
 
   async function handleSubmit(values: PlanFormValues) {
     setIsSubmitting(true);
     try {
-      await updatePlan(params.id, values);
+      await updatePlan(id, values);
       toast.show("Plan updated successfully");
       await mutate("plans");
       router.push("/admin/subscriptions/plans");
@@ -54,5 +54,13 @@ export default function EditPlanPage() {
         onSubmit={handleSubmit}
       />
     </div>
+  );
+}
+
+export default function EditPlanPage() {
+  return (
+    <Suspense fallback={null}>
+      <EditPlanPageContent />
+    </Suspense>
   );
 }
