@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { Button } from "@/components/ui/Button";
+import { ReportIssueDialog } from "@/components/ReportIssueDialog";
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
@@ -17,6 +19,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 export default function ProfilePage() {
   const router = useRouter();
   const { profile, isSubscribed, logout } = useAuth();
+  const [showReportIssue, setShowReportIssue] = useState(false);
 
   if (!profile) return null;
 
@@ -81,6 +84,19 @@ export default function ProfilePage() {
 
       <div className="rounded-2xl bg-white p-5 shadow-sm">
         <h2 className="mb-2 text-xs font-bold uppercase text-neutral-500">
+          Support
+        </h2>
+        <button
+          onClick={() => setShowReportIssue(true)}
+          className="flex w-full items-center justify-between py-2 text-left text-sm font-medium text-neutral-700 hover:text-status-green"
+        >
+          Report an Issue
+          <span className="text-neutral-400">&rsaquo;</span>
+        </button>
+      </div>
+
+      <div className="rounded-2xl bg-white p-5 shadow-sm">
+        <h2 className="mb-2 text-xs font-bold uppercase text-neutral-500">
           Legal
         </h2>
         <Link
@@ -100,6 +116,11 @@ export default function ProfilePage() {
       <Button variant="outline" onClick={onLogout}>
         Logout
       </Button>
+
+      <ReportIssueDialog
+        open={showReportIssue}
+        onClose={() => setShowReportIssue(false)}
+      />
     </div>
   );
 }

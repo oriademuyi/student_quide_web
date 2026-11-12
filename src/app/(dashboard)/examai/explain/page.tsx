@@ -14,6 +14,35 @@ export default function ExplainTopicPage() {
   const [statement, setStatement] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [explanation, setExplanation] = useState<string | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  function stopReadingAloud() {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsSpeaking(false);
+  }
+
+  function toggleReadAloud() {
+    if (!explanation) return;
+
+    if (isSpeaking) {
+      stopReadingAloud();
+      return;
+    }
+
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      toast.show("Read aloud isn't supported in this browser", "error");
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(explanation);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+    setIsSpeaking(true);
+  }
 
   async function onExplain(e: React.FormEvent) {
     e.preventDefault();
@@ -22,6 +51,7 @@ export default function ExplainTopicPage() {
       return;
     }
 
+    stopReadingAloud();
     setIsLoading(true);
     setExplanation(null);
     try {
@@ -36,6 +66,7 @@ export default function ExplainTopicPage() {
   }
 
   function onReset() {
+    stopReadingAloud();
     setExplanation(null);
     setStatement("");
   }
@@ -72,6 +103,8 @@ export default function ExplainTopicPage() {
           <ResultCard
             icon="💡"
             title="Explanation"
+            onReadAloud={toggleReadAloud}
+            isSpeaking={isSpeaking}
             onCopy={() => {
               navigator.clipboard.writeText(explanation);
               toast.show("Copied to clipboard");

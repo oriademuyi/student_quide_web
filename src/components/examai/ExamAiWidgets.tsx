@@ -27,11 +27,15 @@ export function ResultCard({
   title,
   children,
   onCopy,
+  onReadAloud,
+  isSpeaking,
 }: {
   icon: string;
   title: string;
   children: ReactNode;
   onCopy?: () => void;
+  onReadAloud?: () => void;
+  isSpeaking?: boolean;
 }) {
   return (
     <div className="rounded-2xl bg-white p-5 shadow-sm">
@@ -40,6 +44,16 @@ export function ResultCard({
           {icon}
         </span>
         <h3 className="flex-1 text-sm font-bold text-neutral-900">{title}</h3>
+        {onReadAloud && (
+          <button
+            onClick={onReadAloud}
+            className={`text-xs font-semibold ${
+              isSpeaking ? "text-status-green" : "text-neutral-400 hover:text-status-green"
+            }`}
+          >
+            {isSpeaking ? "Stop" : "Read Out Loud"}
+          </button>
+        )}
         {onCopy && (
           <button
             onClick={onCopy}
