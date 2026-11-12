@@ -26,22 +26,28 @@ export function StudentMaterialsBrowser({
 }) {
   const toast = useToast();
   const [courseCode, setCourseCode] = useState("");
-  const [searched, setSearched] = useState(false);
+  const [appliedSearch, setAppliedSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [openingId, setOpeningId] = useState<string | null>(null);
   const [showContact, setShowContact] = useState(false);
 
+  const PAGE_SIZE = 10;
+
   const { data, error, isLoading } = useSWR(
-    "materials",
-    async () => (await getMaterials({ page: 1, limit: 20 })).data
+    ["materials", type, page, appliedSearch],
+    async () =>
+      (
+        await getMaterials({
+          page,
+          limit: PAGE_SIZE,
+          type,
+          courseCode: appliedSearch || undefined,
+        })
+      ).data
   );
 
-  const items = (data?.items ?? []).filter((item) => item.type === type);
-
-  const searchText = courseCode.trim().toLowerCase();
-  const filtered =
-    !searched || !searchText
-      ? items
-      : items.filter((item) => item.courseCode.toLowerCase().includes(searchText));
+  const items = data?.items ?? [];
+  const meta = data?.meta;
 
   async function onOpen(item: MaterialItem) {
     setOpeningId(item.id);
@@ -79,7 +85,8 @@ export function StudentMaterialsBrowser({
             toast.show("Please enter a course code", "error");
             return;
           }
-          setSearched(true);
+          setPage(1);
+          setAppliedSearch(courseCode.trim());
         }}
         className="flex gap-2"
       >
@@ -105,15 +112,17 @@ export function StudentMaterialsBrowser({
         <p className="py-10 text-center text-sm text-status-red">
           {error instanceof ApiError ? error.message : "Failed to load"}
         </p>
-      ) : filtered.length === 0 ? (
+      ) : items.length === 0 ? (
         <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-6 text-center">
           <p className="font-semibold text-neutral-700">
-            {searched ? `No ${emptyLabel} found for ${courseCode}` : `No ${emptyLabel} available`}
+            {appliedSearch
+              ? `No ${emptyLabel} found for ${appliedSearch}`
+              : `No ${emptyLabel} available`}
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {filtered.map((item) => {
+          {items.map((item) => {
             const isPdf = item.mimeType.toLowerCase().includes("pdf");
             return (
               <div key={item.id} className="rounded-2xl bg-white p-4 shadow-sm">
@@ -156,6 +165,28 @@ export function StudentMaterialsBrowser({
         </div>
       )}
 
+      {meta && meta.totalPages > 1 && (
+        <div className="flex items-center justify-between gap-3">
+          <button
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="rounded-xl border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 disabled:opacity-40"
+          >
+            Previous
+          </button>
+          <span className="text-sm text-neutral-500">
+            Page {meta.page} of {meta.totalPages}
+          </span>
+          <button
+            disabled={page >= meta.totalPages}
+            onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
+            className="rounded-xl border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 p-5 text-center sm:flex-row sm:justify-between sm:text-left">
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-whatsapp-green/10 text-lg">
@@ -184,8 +215,8 @@ export function StudentMaterialsBrowser({
         onClose={() => setShowContact(false)}
         initialCategory="Course Materials"
         initialIssue={
-          searched && courseCode.trim()
-            ? `I couldn't find the ${emptyLabel} for ${courseCode.trim()}. Please can you upload it?`
+          appliedSearch
+            ? `I couldn't find the ${emptyLabel} for ${appliedSearch}. Please can you upload it?`
             : `I couldn't find the ${emptyLabel} I'm looking for. Please can you help?`
         }
       />

@@ -6,10 +6,17 @@ import type {
   MaterialType,
 } from "@/types/material";
 
-export function getMaterials(params: { page?: number; limit?: number }) {
+export function getMaterials(params: {
+  page?: number;
+  limit?: number;
+  type?: MaterialType;
+  courseCode?: string;
+}) {
   return apiGet<GetMaterialsResponse>(ApiEndpoints.getMaterials, {
     page: params.page ?? 1,
     limit: params.limit ?? 20,
+    type: params.type,
+    courseCode: params.courseCode || undefined,
   });
 }
 
